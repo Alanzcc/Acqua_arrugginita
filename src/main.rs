@@ -1,18 +1,13 @@
-pub struct Matrix2D {
-    n_rows: usize,
-    n_cols: usize,
-    data: Vec<i8>,
-}
+use std::usize;
 
-impl Matrix2D {
-    fn init_mat_zeros(&mut self) {
-        self.data = vec![0; self.n_rows * self.n_cols]
-    }
-}
+use math::matrix::Matrix;
 
-fn set_pixel(mut screen: Matrix2D, mut x: i32, mut y: i32, intensity: i8) {
-    let c: i32 = screen.n_cols.try_into().unwrap();
-    let r: i32 = screen.n_rows.try_into().unwrap();
+mod math;
+
+fn set_pixel(screen: &mut Matrix, mut x: i32, mut y: i32, intensity: i8) {
+    let c: i32 = screen.get_n_cols().try_into().unwrap();
+    let r: i32 = screen.get_n_rows().try_into().unwrap();
+
     if x < 0 {
         x = 0;
     }
@@ -25,19 +20,27 @@ fn set_pixel(mut screen: Matrix2D, mut x: i32, mut y: i32, intensity: i8) {
     if y >= r {
         y = r - 1;
     }
-    screen.data[x as usize * screen.n_cols + y as usize] = intensity;
+    screen.set_data(x as usize, y as usize, intensity);
+}
+
+// Bresenham
+fn bresenham(screen: &mut Matrix, xi: i32, yi: i32, xf: i32, yf: i32, intensity: i8) {
+    let dx = xf - xi;
+    let dy = yf - yi;
+    let mut y = yi;
+    let mut p = 2 * dy - dx;
+
+    for x in xi..xf {
+        if p > 0 {
+            y = y + 1;
+            p = p + 2 * (dy - dx);
+        } else {
+            p = p + 2 * dy;
+        }
+        set_pixel(screen, x, y, intensity);
+    }
 }
 
 fn main() {
-    let mut mat = Matrix2D {
-        n_rows: 4,
-        n_cols: 4,
-        data: vec![],
-    };
-    mat.init_mat_zeros();
-
-    let x = 2;
-    let y = 2;
-    let a = 2;
-    set_pixel(mat, x, y, a);
+    println!("Buon giorno!")
 }
