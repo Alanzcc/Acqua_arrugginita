@@ -1,46 +1,53 @@
-use std::usize;
+pub mod canvas;
+pub mod math;
 
-use math::matrix::Matrix;
+use anyhow::Result;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::pixels::Color;
+use sdl2::rect::Point;
+use std::time::Duration;
 
-mod math;
+pub fn main() -> Result<()> {
+    let sdl_context = sdl2::init().expect("Expected to initialize sdl2");
+    let video_subsystem = sdl_context.video().unwrap();
 
-fn set_pixel(screen: &mut Matrix, mut x: i32, mut y: i32, intensity: i8) {
-    let c: i32 = screen.get_n_cols().try_into().unwrap();
-    let r: i32 = screen.get_n_rows().try_into().unwrap();
+    let window = video_subsystem
+        .window("rust-sdl2 demo", 800, 600)
+        .position_centered()
+        .build()
+        .expect("Expected to start window");
 
-    if x < 0 {
-        x = 0;
-    }
-    if y < 0 {
-        y = 0;
-    }
-    if x >= c {
-        x = c - 1;
-    }
-    if y >= r {
-        y = r - 1;
-    }
-    screen.set_data(x as usize, y as usize, intensity);
-}
+    let mut canvas = window
+        .into_canvas()
+        .build()
+        .expect("Expected to build the renderer");
 
-// Bresenham
-fn bresenham(screen: &mut Matrix, xi: i32, yi: i32, xf: i32, yf: i32, intensity: i8) {
-    let dx = xf - xi;
-    let dy = yf - yi;
-    let mut y = yi;
-    let mut p = 2 * dy - dx;
-
-    for x in xi..xf {
-        if p > 0 {
-            y = y + 1;
-            p = p + 2 * (dy - dx);
-        } else {
-            p = p + 2 * dy;
+    canvas.set_draw_color(Color::RGB(0, 255, 255));
+    canvas.clear();
+    canvas.present();
+    let mut event_pump = sdl_context
+        .event_pump()
+        .expect("Expected to initialize event pump");
+    let mut i = 0;
+    'running: loop {
+        i = (i + 1) % 255;
+        canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
+        canvas.clear();
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                _ => {}
+            }
         }
-        set_pixel(screen, x, y, intensity);
-    }
-}
+        // The rest of the game loop goes here...
 
-fn main() {
-    println!("Buon giorno!")
+        canvas.present();
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+    }
+    Ok(())
 }

@@ -2,3 +2,8 @@
 name = "acqua_arrugginita"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+sdl2 = "0.37.0"
+thiserror = "1.0.63"

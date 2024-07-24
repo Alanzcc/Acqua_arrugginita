@@ -5,7 +5,7 @@ pub struct Matrix {
 }
 
 impl Matrix {
-    fn init_mat_zeros(&mut self) {
+    pub fn init_mat_zeros(&mut self) {
         self.data = vec![0; self.n_rows * self.n_cols]
     }
 
