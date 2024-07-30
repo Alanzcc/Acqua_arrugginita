@@ -1,6 +1,8 @@
+use sdl2::pixels::Color;
+
 use crate::math::Matrix;
 
-pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: i8) {
+pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
     let c = screen.get_n_cols();
     let r = screen.get_n_rows();
     if x >= c {
@@ -13,7 +15,14 @@ pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: i8)
 }
 
 // Bresenham
-pub fn bresenham(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize, intensity: i8) {
+pub fn bresenham(
+    screen: &mut Matrix,
+    xi: usize,
+    yi: usize,
+    xf: usize,
+    yf: usize,
+    intensity: Color,
+) {
     let dx = xf - xi;
     let dy = yf - yi;
     let mut y = yi;
@@ -30,7 +39,7 @@ pub fn bresenham(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize
     }
 }
 
-pub fn dda(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize, intensity: i8) {
+pub fn dda(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize, intensity: Color) {
     let dx = xf - xi;
     let dy = yf - yi;
 
