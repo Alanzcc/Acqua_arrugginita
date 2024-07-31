@@ -16,16 +16,9 @@ pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Col
 }
 
 // Bresenham
-pub fn bresenham(
-    canvas: &mut Palette,
-    xi: usize,
-    yi: usize,
-    xf: usize,
-    yf: usize,
-    intensity: Color,
-) {
-    let dx = xf - xi;
-    let dy = yf - yi;
+pub fn bresenham(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
+    let dx = (xf - xi).abs();
+    let dy = (yf - yi).abs();
     let mut y = yi;
     let mut p = 2 * dy - dx;
 
@@ -36,12 +29,11 @@ pub fn bresenham(
         } else {
             p += 2 * dy;
         }
-        let point = Point::new(x as i32, y as i32);
-        canvas.paint_point(point, intensity);
+        canvas.paint_point(Point::new(x, y), intensity);
     }
 }
 
-pub fn dda(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize, intensity: Color) {
+pub fn dda(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = xf - xi;
     let dy = yf - yi;
     let steps = if dx > dy { dx } else { dy };
@@ -51,7 +43,7 @@ pub fn dda(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize, inte
     let mut y = yi;
 
     for _i in 0..=steps {
-        set_pixel(screen, x, y, intensity);
+        canvas.paint_point(Point::new(x, y), intensity);
         x += step_x;
         y += step_y;
     }

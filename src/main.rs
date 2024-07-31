@@ -1,6 +1,7 @@
 pub mod math;
 pub mod painting;
-use painting::canvas::bresenham;
+use painting::canvas::dda;
+//use painting::canvas::bresenham;
 use painting::palette::Palette;
 
 use anyhow::Result;
@@ -31,7 +32,10 @@ pub fn main() -> Result<()> {
         .expect("Expected to initialize event pump");
 
     let mut ex = Palette::init();
-    bresenham(&mut ex, 0, 0, 799, 799, Color::RGB(40, 30, 180));
+    // bresenham(&mut ex, 0, 0, 799, 799, Color::RGB(40, 30, 180));
+
+    dda(&mut ex, 0, 0, 799, 799, Color::RGB(0, 150, 100));
+    dda(&mut ex, 799, 0, 0, 799, Color::RGB(100, 150, 0));
 
     'running: loop {
         for event in event_pump.poll_iter() {
