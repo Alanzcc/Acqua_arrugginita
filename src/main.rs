@@ -1,12 +1,12 @@
-pub mod canvas;
 pub mod math;
+pub mod painting;
+use painting::canvas::bresenham;
+use painting::palette::Palette;
 
 use anyhow::Result;
-use math::Matrix;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::Point;
 use std::time::Duration;
 
 pub fn main() -> Result<()> {
@@ -16,7 +16,7 @@ pub fn main() -> Result<()> {
         .video()
         .expect("Expected to initialize video_subsystem");
     let window = video_subsystem
-        .window("rust-sdl2 demo", 800, 600)
+        .window("rust-sdl2 demo", 800, 800)
         .position_centered()
         .build()
         .expect("Expected to start window");
@@ -30,8 +30,8 @@ pub fn main() -> Result<()> {
         .event_pump()
         .expect("Expected to initialize event pump");
 
-    let mut i = 0;
-    let mut point = Point::new(0, 0);
+    let mut ex = Palette::init();
+    bresenham(&mut ex, 0, 0, 799, 799, Color::RGB(40, 30, 180));
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -47,12 +47,12 @@ pub fn main() -> Result<()> {
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
 
-        for j in 0..799 {
-            i = (i + 1) % 255;
-            canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
-            point.x = j;
-            point.y = j;
-            canvas.draw_point(point);
+        let exs = ex.check_points();
+        for (k, v) in exs.iter() {
+            canvas.set_draw_color(*k);
+            for p in v {
+                canvas.draw_point(*p);
+            }
         }
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
