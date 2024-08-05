@@ -1,6 +1,7 @@
-use sdl2::pixels::Color;
-
 use crate::math::Matrix;
+use crate::Palette;
+use sdl2::pixels::Color;
+use sdl2::rect::Point;
 
 pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
     let c = screen.get_n_cols();
@@ -20,50 +21,36 @@ pub fun sdl_set_pixel(canvas: &mut Canvas<Window>, x: i32, y: i32, intensity: u8
 }
 
 // Bresenham
-pub fn bresenham(
-    screen: &mut Matrix,
-    xi: usize,
-    yi: usize,
-    xf: usize,
-    yf: usize,
-    intensity: Color,
-) {
-    let dx = xf - xi;
-    let dy = yf - yi;
+pub fn bresenham(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
+    let dx = (xf - xi).abs();
+    let dy = (yf - yi).abs();
     let mut y = yi;
     let mut p = 2 * dy - dx;
 
     for x in xi..xf {
         if p > 0 {
-            y = y + 1;
-            p = p + 2 * (dy - dx);
+            y += 1;
+            p += 2 * (dy - dx);
         } else {
-            p = p + 2 * dy;
+            p += 2 * dy;
         }
-        set_pixel(screen, x, y, intensity);
+        canvas.paint_point(Point::new(x, y), intensity);
     }
 }
 
-pub fn dda(screen: &mut Matrix, xi: usize, yi: usize, xf: usize, yf: usize, intensity: Color) {
+pub fn dda(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = xf - xi;
     let dy = yf - yi;
-
-    let steps: usize;
-    if dx > dy {
-        steps = dx;
-    } else {
-        steps = dy;
-    }
-
+    let steps = if dx > dy { dx } else { dy };
     let step_x = dx / steps;
     let step_y = dy / steps;
     let mut x = xi;
     let mut y = yi;
 
     for _i in 0..=steps {
-        set_pixel(screen, x, y, intensity);
-        x = x + step_x;
-        y = y + step_y;
+        canvas.paint_point(Point::new(x, y), intensity);
+        x += step_x;
+        y += step_y;
     }
 }
 
