@@ -1,6 +1,7 @@
 pub mod math;
 pub mod painting;
 use painting::canvas::dda;
+use painting::canvas::dda_aa;
 //use painting::canvas::bresenham;
 use painting::palette::Palette;
 

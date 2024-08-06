@@ -15,11 +15,6 @@ pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Col
     screen.set_data(x, y, intensity);
 }
 
-pub fun sdl_set_pixel(canvas: &mut Canvas<Window>, x: i32, y: i32, intensity: u8 ) -> Result<(), String> {
-    canvas.set_draw_color(Color::RGB(intensity, intensity, intensity));
-    canvas.draw_point()
-}
-
 // Bresenham
 pub fn bresenham(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi).abs();
@@ -54,7 +49,6 @@ pub fn dda(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: 
     }
 }
 
-<<<<<<< Updated upstream
 pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi) as f32;
     let dy = (yf - yi) as f32;
@@ -64,21 +58,32 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
     let mut x = xi as f32;
     let mut y = yi as f32;
 
+    canvas.paint_point(Point::new(x as i32, y as i32), intensity);
+
     for _i in 0..=steps as i32 {
-        let prop = if step_x.abs() == 1.0 {
-            (y - y.floor()).abs()
-        } else {
-            (x - x.floor()).abs()
-        };
 
-        let main_color_intensity = ((1.0 - prop) * 255.0) as u8;
-        let adjacent_color_intensity = (prop * 255.0) as u8;
-
-        let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
-        let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
         x += step_x;
         y += step_y;
+        let prop:f32;
+
+        if step_x.abs() == 1.0 {
+            prop = (y - y.floor()).abs();
+            let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
+            let adjacent_color_intensity = (prop * 255.0).round() as u8;
+            let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
+            let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+            canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
+            canvas.paint_point(Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32), adjacent_color);
+        } else {
+            prop = (x - x.floor()).abs();
+            let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
+            let adjacent_color_intensity = (prop * 255.0).round() as u8;
+            let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
+            let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+            canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
+            canvas.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
+        }
+        
     }
 }
-=======
->>>>>>> Stashed changes
+
