@@ -49,10 +49,19 @@ pub fn dda(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: 
     }
 }
 
+fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
+    let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
+    let adjacent_color_intensity = (prop * 255.0).round() as u8;
+    let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
+    let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+    (main_color, adjacent_color)
+}
+
+
 pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi) as f32;
     let dy = (yf - yi) as f32;
-    let steps = if dx > dy { dx.abs() } else { dy.abs() };
+    let steps = if dx.abs() > dy.abs() { dx.abs() } else { dy.abs() };
     let step_x = dx / steps;
     let step_y = dy / steps;
     let mut x = xi as f32;
@@ -68,18 +77,12 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
 
         if step_x.abs() == 1.0 {
             prop = (y - y.floor()).abs();
-            let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
-            let adjacent_color_intensity = (prop * 255.0).round() as u8;
-            let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
-            let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+            let (main_color, adjacent_color) = calculate_colors(intensity, prop);
             canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
             canvas.paint_point(Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32), adjacent_color);
         } else {
             prop = (x - x.floor()).abs();
-            let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
-            let adjacent_color_intensity = (prop * 255.0).round() as u8;
-            let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
-            let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+            let (main_color, adjacent_color) = calculate_colors(intensity, prop);
             canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
             canvas.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
         }
