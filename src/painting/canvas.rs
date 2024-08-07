@@ -89,4 +89,3 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
         
     }
 }
-
