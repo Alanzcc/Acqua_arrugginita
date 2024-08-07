@@ -1,3 +1,4 @@
+use std::f32::consts::PI;
 use crate::math::Matrix;
 use crate::Palette;
 use sdl2::pixels::Color;
@@ -114,4 +115,16 @@ pub fn draw_polygon(palette: &mut Palette, polygon: Polygon, intensity: Color) {
     let p0 = polygon.read_vertex(0);
     let pn = polygon.read_vertex(pol_len - 1);
     dda_aa(palette, p0.x, p0.y, pn.x, pn.y, intensity);
+}
+
+pub fn draw_circle(palette: &mut Palette, intensity: Color, xc: i32, yc: i32, r: f32) {
+    let mut circle = Polygon::new(vec![]);
+    let mut angle: f32 = 0.0;
+    while angle < 2.0 * PI {
+        circle.add_vertex(
+            Point::new((xc as f32 + (r * angle.cos())).floor() as i32,
+                       (yc as f32 + (r * angle.sin())).floor() as i32));
+        angle += 0.0001;
+    }
+    draw_polygon(palette, circle, intensity);
 }
