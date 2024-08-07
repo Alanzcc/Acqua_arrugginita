@@ -62,4 +62,45 @@ pub fn draw_polygon(palette: &mut Palette, polygon: Polygon, intensity: Color) {
     let p0 = polygon.read_vertex(0 );
     let pn = polygon.read_vertex(pol_len - 1);
     dda(palette, p0.x, p0.y, pn.x, pn.y, intensity);
+
+// Private function for DDA_AA
+fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
+    let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
+    let adjacent_color_intensity = (prop * 255.0).round() as u8;
+    let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
+    let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+    (main_color, adjacent_color)
+}
+
+
+pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
+    let dx = (xf - xi) as f32;
+    let dy = (yf - yi) as f32;
+    let steps = if dx.abs() > dy.abs() { dx.abs() } else { dy.abs() };
+    let step_x = dx / steps;
+    let step_y = dy / steps;
+    let mut x = xi as f32;
+    let mut y = yi as f32;
+
+    canvas.paint_point(Point::new(x as i32, y as i32), intensity);
+
+    for _i in 0..=steps as i32 {
+
+        x += step_x;
+        y += step_y;
+        let prop:f32;
+
+        if step_x.abs() == 1.0 {
+            prop = (y - y.floor()).abs();
+            let (main_color, adjacent_color) = calculate_colors(intensity, prop);
+            canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
+            canvas.paint_point(Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32), adjacent_color);
+        } else {
+            prop = (x - x.floor()).abs();
+            let (main_color, adjacent_color) = calculate_colors(intensity, prop);
+            canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
+            canvas.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
+        }
+        
+    }
 }
