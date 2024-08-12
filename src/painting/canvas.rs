@@ -90,3 +90,27 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
     }
 }
 
+// recebe canvas, polígono, intensidade da cor
+// 1. encontrar a menor e a maior coordenada do polígono
+// 2. iterar por cada linha horizontal entre yi e yf
+// 3. encontra interseções: recebe uma coordenada y, um ponto inicial e um ponto final; retorna a coordenada da interseção ou -1 
+// 4. voltar para o primeiro ponto
+// 5. preencher a linha atual da imagem entre as interseções encontradas
+
+//3
+fn find_intersection(y: f64, pi: Point, pf: Point) -> Option<(Point, Point)> {
+    if pi.1 == pf.1 {
+        None
+    }
+
+    let t = (y - pi.1) / (pf.1 - pi.1);
+    if (t < 0.0 || t > 1.0) {
+        None
+    }
+
+    let x = pi.0 + t * (pf.0 - pi.0);
+
+    Some((x, y))
+}
+
+fn print_scan()
