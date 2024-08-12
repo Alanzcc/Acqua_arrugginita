@@ -70,7 +70,7 @@ fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
 }
 
 
-pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
+pub fn dda_aa(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi) as f32;
     let dy = (yf - yi) as f32;
     let steps = if dx.abs() > dy.abs() { dx.abs() } else { dy.abs() };
@@ -88,13 +88,13 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
         if step_x.abs() == 1.0 {
             prop = (y - y.floor()).abs();
             let (main_color, adjacent_color) = calculate_colors(intensity, prop);
-            canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
-            canvas.paint_point(Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32), adjacent_color);
+            palette.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
+            palette.paint_point(Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32), adjacent_color);
         } else {
             prop = (x - x.floor()).abs();
             let (main_color, adjacent_color) = calculate_colors(intensity, prop);
-            canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
-            canvas.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
+            palette.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
+            palette.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
         }
         x += step_x;
         y += step_y;
@@ -104,24 +104,79 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
 // recebe canvas, polígono, intensidade da cor
 // 1. encontrar a menor e a maior coordenada do polígono
 // 2. iterar por cada linha horizontal entre yi e yf
-// 3. encontra interseções: recebe uma coordenada y, um ponto inicial e um ponto final; retorna a coordenada da interseção ou -1 
+// 3. encontra interseções: recebe uma coordenada y, um ponto inicial e um ponto final; retorna a coordenada da interseção ou Nada?
 // 4. voltar para o primeiro ponto
 // 5. preencher a linha atual da imagem entre as interseções encontradas
 
 //3
-fn find_intersection(y: f64, pi: Point, pf: Point) -> Option<(Point, Point)> {
-    if pi.1 == pf.1 {
-        None
+fn find_intersection(y: i32, pi: &Point, pf: &Point) -> Option<Point> {
+    if pi.y == pf.y {
+        return None;
     }
 
-    let t = (y - pi.1) / (pf.1 - pi.1);
-    if (t < 0.0 || t > 1.0) {
-        None
+    let t = (y - pi.y) as f32 / (pf.y - pi.y) as f32;
+    if t < 0.0 || t > 1.0 {
+        return None;
     }
 
-    let x = pi.0 + t * (pf.0 - pi.0);
+    let x = pi.x as f32 + t * (pf.x - pi.x) as f32;
 
-    Some((x, y))
+    Some(Point::new(x.round() as i32, y))
 }
 
-fn print_scan()
+//5
+fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
+    if p_int.len() < 2 {
+        //menos de dois pontos de interseção (não desenha nada)
+        return;
+    }
+    //esquerda p/ direita
+    for i in (0..p_int.len()).step_by(2) {
+        let (x1, x2) = if p_int[i].x > p_int[i + 1].x {
+            (p_int[i + 1].x, p_int[i].x)
+        } else {
+            (p_int[i].x, p_int[i + 1].x)
+        };
+
+        for x in x1..=x2 {
+            palette.paint_point(Point::new(x, p_int[i].y), intensity);
+        }
+    }
+}
+
+fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
+    let mut yi = i32::MAX;
+    let mut yf = i32::MIN;
+    //1
+    //encontrar o y minimo e maximo do poligono
+    for i in 0..polygon.len() {
+        let vertex = polygon.read_vertex(i);
+        if vertex.y < yi {
+            yi = vertex.y;
+        }
+        if vertex.y > yf {
+            yf = vertex.y
+        }
+    }
+
+    //
+    for y in yi..yf {
+        let mut intersections: Vec<Point>;
+        intersections = Vec::new();
+
+        let mut previous_vertex = polygon.read_vertex(polygon.len() - 1);
+        // D->A, A->B, B->C, C->D
+
+        for i in 0..polygon.len() {
+            let current_vertex = polygon.read_vertex(i);
+            if let Some(intersection) = find_intersection(y, &previous_vertex, &current_vertex) {
+                intersections.push(intersection);
+            }
+            previous_vertex = current_vertex;
+        }
+
+        //
+        intersections.sort_by(|a, b| a.x.cmp(&b.x));
+        print_scan(palette, &intersections, intensity);
+    }
+}
