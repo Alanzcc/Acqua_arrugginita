@@ -3,6 +3,7 @@ use crate::Palette;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use crate::painting::shapes::Polygon;
+use core::f32::consts::PI;
 
 pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
     let c = screen.get_n_cols();
@@ -116,14 +117,16 @@ pub fn draw_polygon(palette: &mut Palette, polygon: Polygon, intensity: Color) {
     dda_aa(palette, p0.x, p0.y, pn.x, pn.y, intensity);
 }
 
-pub fn draw_circle(palette: &mut Palette, intensity: Color, xc: i32, yc: i32, r: f32) {
+pub fn draw_circle(palette: &mut Palette, intensity: Color, center: Point, r: f32) {
     let mut circle = Polygon::new(vec![]);
     let mut angle: f32 = 0.0;
     while angle < 2.0 * PI {
         circle.add_vertex(
-            Point::new((xc as f32 + (r * angle.cos())).floor() as i32,
-                       (yc as f32 + (r * angle.sin())).floor() as i32));
-        angle += 0.0001;
+            Point::new((center.x as f32 + (r * angle.cos())).floor() as i32,
+                       (center.y as f32 + (r * angle.sin())).floor() as i32));
+        angle += 0.05;
     }
     draw_polygon(palette, circle, intensity);
 }
+
+
