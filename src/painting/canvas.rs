@@ -1,7 +1,11 @@
 use crate::math::Matrix;
+use crate::painting::shapes::Polygon;
 use crate::Palette;
+use core::f32::consts::PI;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
+use crate::painting::shapes::Polygon;
+use core::f32::consts::PI;
 
 pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
     let c = screen.get_n_cols();
@@ -16,7 +20,7 @@ pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Col
 }
 
 // Bresenham
-pub fn bresenham(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
+pub fn bresenham(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi).abs();
     let dy = (yf - yi).abs();
     let mut y = yi;
@@ -29,11 +33,11 @@ pub fn bresenham(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, inten
         } else {
             p += 2 * dy;
         }
-        canvas.paint_point(Point::new(x, y), intensity);
+        palette.paint_point(Point::new(x, y), intensity);
     }
 }
 
-pub fn dda(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
+pub fn dda(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = xf - xi;
     let dy = yf - yi;
     let steps = if dx > dy { dx } else { dy };
@@ -43,17 +47,25 @@ pub fn dda(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: 
     let mut y = yi;
 
     for _i in 0..=steps {
-        canvas.paint_point(Point::new(x, y), intensity);
+        palette.paint_point(Point::new(x, y), intensity);
         x += step_x;
         y += step_y;
     }
 }
 
+// Private function for DDA_AA
 fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
-    let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
+
+
+    let main_color_intensity= ((1.0 - prop) * 255.0).round() as u8;
     let adjacent_color_intensity = (prop * 255.0).round() as u8;
     let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
-    let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
+    let adjacent_color = Color::RGBA(
+        intensity.r,
+        intensity.g,
+        intensity.b,
+        adjacent_color_intensity,
+    );
     (main_color, adjacent_color)
 }
 
@@ -64,17 +76,15 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
     let steps = if dx.abs() > dy.abs() { dx.abs() } else { dy.abs() };
     let step_x = dx / steps;
     let step_y = dy / steps;
+
     let mut x = xi as f32;
     let mut y = yi as f32;
 
-    canvas.paint_point(Point::new(x as i32, y as i32), intensity);
+    palette.paint_point(Point::new(x as i32, y as i32), intensity);
 
     for _i in 0..=steps as i32 {
 
-        x += step_x;
-        y += step_y;
-        let prop:f32;
-
+        let prop: f32;
         if step_x.abs() == 1.0 {
             prop = (y - y.floor()).abs();
             let (main_color, adjacent_color) = calculate_colors(intensity, prop);
@@ -86,7 +96,8 @@ pub fn dda_aa(canvas: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensit
             canvas.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
             canvas.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
         }
-        
+        x += step_x;
+        y += step_y;
     }
 }
 
