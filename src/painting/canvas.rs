@@ -53,9 +53,7 @@ pub fn dda(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity:
 
 // Private function for DDA_AA
 fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
-
-
-    let main_color_intensity= ((1.0 - prop) * 255.0).round() as u8;
+    let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
     let adjacent_color_intensity = (prop * 255.0).round() as u8;
     let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
     let adjacent_color = Color::RGBA(intensity.r, intensity.g, intensity.b, adjacent_color_intensity);
@@ -77,7 +75,6 @@ pub fn dda_aa(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensi
     palette.paint_point(Point::new(x as i32, y as i32), intensity);
 
     for _i in 0..=steps as i32 {
-
         let prop: f32;
         if step_x.abs() == 1.0 {
             prop = (y - y.floor()).abs();
@@ -117,7 +114,9 @@ pub fn draw_polygon(palette: &mut Palette, polygon: Polygon, intensity: Color) {
     dda_aa(palette, p0.x, p0.y, pn.x, pn.y, intensity);
 }
 
-pub fn draw_circle(palette: &mut Palette, circle: &mut Polygon, intensity: Color, center: Point, r: f32) {
+// Circle polygon should be empty
+pub fn calc_circle(center: Point, r: f32) -> Polygon {
+    let mut circle = Polygon::new(vec![]);
     let mut angle: f32 = 0.0;
     while angle < 2.0 * PI {
         circle.add_vertex(
@@ -125,7 +124,6 @@ pub fn draw_circle(palette: &mut Palette, circle: &mut Polygon, intensity: Color
                        (center.y as f32 + (r * angle.sin())).floor() as i32));
         angle += 0.05;
     }
-    draw_polygon(palette, circle, intensity);
+    circle
 }
-
 
