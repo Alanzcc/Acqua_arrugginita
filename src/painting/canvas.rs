@@ -4,8 +4,8 @@ use crate::Palette;
 use core::f32::consts::PI;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
-use crate::painting::shapes::Polygon;
-use core::f32::consts::PI;
+//use crate::painting::shapes::Polygon;
+//use core::f32::consts::PI;
 
 pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
     let c = screen.get_n_cols();
@@ -18,6 +18,17 @@ pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Col
     }
     screen.set_data(x, y, intensity);
 }
+
+//Textura
+/*pub fn get_texel(palette: &mut Palette, tx: f32, ty: f32) {
+    let mut t_x = tx.abs();
+    let mut t_y = ty.abs();
+
+    t_x = t_x - tx.floor();
+    t_y = t_y - ty.floor();
+
+    x = ()
+} */
 
 // Bresenham
 pub fn bresenham(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
@@ -55,9 +66,7 @@ pub fn dda(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity:
 
 // Private function for DDA_AA
 fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
-
-
-    let main_color_intensity= ((1.0 - prop) * 255.0).round() as u8;
+    let main_color_intensity = ((1.0 - prop) * 255.0).round() as u8;
     let adjacent_color_intensity = (prop * 255.0).round() as u8;
     let main_color = Color::RGBA(intensity.r, intensity.g, intensity.b, main_color_intensity);
     let adjacent_color = Color::RGBA(
@@ -69,11 +78,14 @@ fn calculate_colors(intensity: Color, prop: f32) -> (Color, Color) {
     (main_color, adjacent_color)
 }
 
-
 pub fn dda_aa(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi) as f32;
     let dy = (yf - yi) as f32;
-    let steps = if dx.abs() > dy.abs() { dx.abs() } else { dy.abs() };
+    let steps = if dx.abs() > dy.abs() {
+        dx.abs()
+    } else {
+        dy.abs()
+    };
     let step_x = dx / steps;
     let step_y = dy / steps;
 
@@ -83,18 +95,23 @@ pub fn dda_aa(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensi
     palette.paint_point(Point::new(x as i32, y as i32), intensity);
 
     for _i in 0..=steps as i32 {
-
         let prop: f32;
         if step_x.abs() == 1.0 {
             prop = (y - y.floor()).abs();
             let (main_color, adjacent_color) = calculate_colors(intensity, prop);
             palette.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
-            palette.paint_point(Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32), adjacent_color);
+            palette.paint_point(
+                Point::new(x.floor() as i32, (y + step_y.signum()).floor() as i32),
+                adjacent_color,
+            );
         } else {
             prop = (x - x.floor()).abs();
             let (main_color, adjacent_color) = calculate_colors(intensity, prop);
             palette.paint_point(Point::new(x.floor() as i32, y.floor() as i32), main_color);
-            palette.paint_point(Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32), adjacent_color);
+            palette.paint_point(
+                Point::new((x + step_x.signum()).floor() as i32, y.floor() as i32),
+                adjacent_color,
+            );
         }
         x += step_x;
         y += step_y;
@@ -110,18 +127,31 @@ pub fn dda_aa(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensi
 
 //3
 fn find_intersection(y: i32, pi: &Point, pf: &Point) -> Option<Point> {
-    if pi.y == pf.y {
+    let mut p_i = pi;
+    let mut p_f = pf;
+
+    if p_i.x > p_f.x {
+        let aux = p_i;
+        p_i = p_f;
+        p_f = aux;
+    }
+
+    if p_i.y == p_f.y {
+        if p_i.y == y {
+            return Some(Point::new(p_i.x, y));
+        } else {
+            return None;
+        }
+    }
+
+    let t = (y - p_i.y) as f32 / (p_f.y - p_i.y) as f32;
+    if t <= 0.0 || t > 1.0 {
         return None;
     }
 
-    let t = (y - pi.y) as f32 / (pf.y - pi.y) as f32;
-    if t < 0.0 || t > 1.0 {
-        return None;
-    }
+    let x = p_i.x as f32 + t * (p_f.x - p_i.x) as f32;
 
-    let x = pi.x as f32 + t * (pf.x - pi.x) as f32;
-
-    Some(Point::new(x.round() as i32, y))
+   Some(Point::new(x.round() as i32, y))
 }
 
 //5
@@ -131,7 +161,7 @@ fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
         return;
     }
     //esquerda p/ direita
-    for i in (0..p_int.len()).step_by(2) {
+    for i in (0..p_int.len() - 1).step_by(2) {
         let (x1, x2) = if p_int[i].x > p_int[i + 1].x {
             (p_int[i + 1].x, p_int[i].x)
         } else {
@@ -144,7 +174,7 @@ fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
     }
 }
 
-fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
+pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
     let mut yi = i32::MAX;
     let mut yf = i32::MIN;
     //1
@@ -160,12 +190,11 @@ fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
     }
 
     //
-    for y in yi..yf {
-        let mut intersections: Vec<Point>;
-        intersections = Vec::new();
+    for y in yi..=yf {
+        let mut intersections: Vec<Point> = Vec::new();
 
         let mut previous_vertex = polygon.read_vertex(polygon.len() - 1);
-        // D->A, A->B, B->C, C->D
+        // D->A, A->B, B->C, C->D //4
 
         for i in 0..polygon.len() {
             let current_vertex = polygon.read_vertex(i);
@@ -177,6 +206,13 @@ fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
 
         //
         intersections.sort_by(|a, b| a.x.cmp(&b.x));
+
+        /*if intersections.len() % 2 != 0 {
+            if let Some(last_point) = intersections.last() {
+                intersections.push(Point::new(last_point.x, y));
+            }
+        } */
+       
         print_scan(palette, &intersections, intensity);
     }
 }
