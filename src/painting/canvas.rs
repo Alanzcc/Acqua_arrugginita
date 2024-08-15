@@ -1,20 +1,25 @@
-use crate::math::Matrix;
 use crate::Palette;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use crate::painting::shapes::Polygon;
 use core::f32::consts::PI;
+use sdl2::render::WindowCanvas;
 
-pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
-    let c = screen.get_n_cols();
-    let r = screen.get_n_rows();
-    if x >= c {
-        x = c - 1;
+pub fn set_pixel(palette: Palette, canvas: &mut WindowCanvas, width: u32, height: u32, prim_color: Color) {
+    canvas.set_draw_color(prim_color);
+    canvas.clear();
+    let exs = palette.check_points();
+    for (k, v) in exs.iter() {
+        canvas.set_draw_color(*k);
+        for p in v {
+            if p.x >= 1 && p.x <= width as i32 {
+                if p.y >= 1 && p.x <= height as i32 {
+                    canvas.draw_point(*p).expect("Expected to draw pixel");
+                }
+            }
+        }
     }
-    if y >= r {
-        y = r - 1;
-    }
-    screen.set_data(x, y, intensity);
+    canvas.present();
 }
 
 // Bresenham

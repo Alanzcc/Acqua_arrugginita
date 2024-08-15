@@ -2,7 +2,7 @@ pub mod math;
 pub mod painting;
 use crate::painting::shapes::Polygon;
 use painting::palette::Palette;
-use crate::painting::canvas::draw_polygon;
+use crate::painting::canvas::{draw_polygon, set_pixel};
 
 use anyhow::Result;
 use sdl2::event::Event;
@@ -66,17 +66,7 @@ pub fn main() -> Result<()> {
                 _ => {}
             }
         }
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
-
-        let exs = ex.check_points();
-        for (k, v) in exs.iter() {
-            canvas.set_draw_color(*k);
-            for p in v {
-                canvas.draw_point(*p).expect("Expected to draw pixel");
-            }
-        }
-        canvas.present();
+        set_pixel(ex, &mut canvas, 800, 800, Color { r: 255, g: 0, b: 0, a: 255 });
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
     Ok(())
