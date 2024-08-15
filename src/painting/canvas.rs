@@ -1,9 +1,11 @@
+
 use crate::math::Matrix;
 use crate::painting::shapes::Polygon;
 use crate::Palette;
 use core::f32::consts::PI;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
+use sdl2::render::Texture;
 //use crate::painting::shapes::Polygon;
 //use core::f32::consts::PI;
 
@@ -18,17 +20,6 @@ pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Col
     }
     screen.set_data(x, y, intensity);
 }
-
-//Textura
-/*pub fn get_texel(palette: &mut Palette, tx: f32, ty: f32) {
-    let mut t_x = tx.abs();
-    let mut t_y = ty.abs();
-
-    t_x = t_x - tx.floor();
-    t_y = t_y - ty.floor();
-
-    x = ()
-} */
 
 // Bresenham
 pub fn bresenham(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
@@ -151,7 +142,7 @@ fn find_intersection(y: i32, pi: &Point, pf: &Point) -> Option<Point> {
 
     let x = p_i.x as f32 + t * (p_f.x - p_i.x) as f32;
 
-   Some(Point::new(x.round() as i32, y))
+    Some(Point::new(x.round() as i32, y))
 }
 
 //5
@@ -174,7 +165,7 @@ fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
     }
 }
 
-pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
+/*pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
     let mut yi = i32::MAX;
     let mut yf = i32::MIN;
     //1
@@ -207,12 +198,59 @@ pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
         //
         intersections.sort_by(|a, b| a.x.cmp(&b.x));
 
-        /*if intersections.len() % 2 != 0 {
-            if let Some(last_point) = intersections.last() {
-                intersections.push(Point::new(last_point.x, y));
+        print_scan(palette, &intersections, intensity);
+    }
+}
+*/
+
+//Textura
+pub fn get_texel(texture: &Texture, tx: f32, ty: f32) -> Color {
+    let query = texture.query();
+    let width = query.width;
+    let height = query.height;
+    let mut t_x = tx.abs() % 1.0;
+    let mut t_y = ty.abs() % 1.0;
+
+    let x = ((width - 1) as f32 * tx).round() as u32;
+    let y = ((height - 1) as f32 * ty).round() as u32;
+
+
+} 
+
+//scanline com textura 
+pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Option<Color>, texture: Option<&Texture>) {
+    let mut yi = i32::MAX;
+    let mut yf = i32::MIN;
+    //1
+    //encontrar o y minimo e maximo do poligono
+    for i in 0..polygon.len() {
+        let vertex = polygon.read_vertex(i);
+        if vertex.y < yi {
+            yi = vertex.y;
+        }
+        if vertex.y > yf {
+            yf = vertex.y
+        }
+    }
+
+    //
+    for y in yi..=yf {
+        let mut intersections: Vec<Point> = Vec::new();
+
+        let mut previous_vertex = polygon.read_vertex(polygon.len() - 1);
+        // D->A, A->B, B->C, C->D //4
+
+        for i in 0..polygon.len() {
+            let current_vertex = polygon.read_vertex(i);
+            if let Some(intersection) = find_intersection(y, &previous_vertex, &current_vertex) {
+                intersections.push(intersection);
             }
-        } */
-       
+            previous_vertex = current_vertex;
+        }
+
+        //
+        intersections.sort_by(|a, b| a.x.cmp(&b.x));
+
         print_scan(palette, &intersections, intensity);
     }
 }
