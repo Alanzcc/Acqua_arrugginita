@@ -5,23 +5,13 @@ use crate::painting::shapes::Polygon;
 use core::f32::consts::PI;
 use sdl2::render::WindowCanvas;
 
-pub fn set_pixel(palette: Palette, canvas: &mut WindowCanvas, width: u32, height: u32, prim_color: Color) {
-    canvas.set_draw_color(prim_color);
-    canvas.clear();
-    let exs = palette.check_points();
-    for (k, v) in exs.iter() {
-        canvas.set_draw_color(*k);
-        for p in v {
-            if p.x >= 1 && p.x <= width as i32 {
-                if p.y >= 1 && p.x <= height as i32 {
-                    canvas.draw_point(*p).expect("Expected to draw pixel");
-                }
-            }
+pub fn set_pixel(canvas: &mut WindowCanvas, width: u32, height: u32, p: Point) {
+    if p.x >= 0 && p.x < width as i32 {
+        if p.y >= 0 && p.x < height as i32 {
+            canvas.draw_point(*p).expect("Expected to draw pixel");
         }
     }
-    canvas.present();
 }
-
 // Bresenham
 pub fn bresenham(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
     let dx = (xf - xi).abs();
