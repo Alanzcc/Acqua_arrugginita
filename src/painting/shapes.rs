@@ -81,25 +81,11 @@ impl Polygon {
     }
 
     fn length(v: &Point) -> f32 { ((v.x * v.x + v.y + v.y) as f32).sqrt() }
-    fn reflect_vec(l: &Point) -> Vec<i32> {
-        vec![
-            (l.x * l.x - l.y * l.y) as i32, (2 * l.x * l.y) as i32,
-            (2 * l.x * l.y) as i32, (l.y * l.y + l.x * l.x) as i32]
-    }
-    fn scale_reflect(lv: Vec<i32>, k: f32) -> Vec<i32> {
-        let s = 1.0 / (k * k);
-        vec![(lv[0] as f32 * s) as i32, (lv[1] as f32 * s) as i32,
-             (lv[2] as f32 * s) as i32, (lv[3] as f32 * s) as i32]
-    }
 
-    pub fn reflection(&self, l: &Point) -> Polygon {
-        let mut reflected = Polygon::new(vec![]);
-        for v in &self.vertices {
-            let lvs = Self::scale_reflect(Self::reflect_vec(&l), Self::length(&l));
-            reflected.add_vertex(Point::new(
-                lvs[0] * v.x + lvs[1] * v.y,
-                lvs[2] * v.x + lvs[3] * v.y));
+    pub fn reflection(&mut self) {
+        for i in 0..self.len() {
+            let v = self.vertices[i];
+            self.vertices[i] = Point::new(v.y, v.x);
         }
-        reflected
     }
 }
