@@ -1,4 +1,3 @@
-
 use crate::math::Matrix;
 use crate::painting::shapes::Polygon;
 use crate::Palette;
@@ -146,6 +145,7 @@ fn find_intersection(y: i32, pi: &Point, pf: &Point) -> Option<Point> {
 }
 
 //5
+
 fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
     if p_int.len() < 2 {
         //menos de dois pontos de interseção (não desenha nada)
@@ -165,7 +165,8 @@ fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
     }
 }
 
-/*pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
+
+pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
     let mut yi = i32::MAX;
     let mut yf = i32::MIN;
     //1
@@ -201,24 +202,69 @@ fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
         print_scan(palette, &intersections, intensity);
     }
 }
-*/
+
 
 //Textura
-pub fn get_texel(texture: &Texture, tx: f32, ty: f32) -> Color {
+/*pub fn get_texel(texture: &mut Texture, tx: f32, ty: f32) -> Color {
     let query = texture.query();
     let width = query.width;
     let height = query.height;
-    let mut t_x = tx.abs() % 1.0;
-    let mut t_y = ty.abs() % 1.0;
+    let t_x = tx.abs() % 1.0;
+    let t_y = ty.abs() % 1.0;
 
-    let x = ((width - 1) as f32 * tx).round() as u32;
-    let y = ((height - 1) as f32 * ty).round() as u32;
+    let x = ((width - 1) as f32 * t_x).round() as u32;
+    let y = ((height - 1) as f32 * t_y).round() as u32;
 
 
+}
+    */
+
+//print_scan com textura
+
+/*
+fn print_scan(
+    palette: &mut Palette,
+    p_int: &[Point],
+    intensity: Option<Color>,
+    mut texture: Option<&mut Texture>,
+) {
+    if p_int.len() < 2 {
+        //menos de dois pontos de interseção (não desenha nada)
+        return;
+    }
+    //esquerda p/ direita
+    for i in (0..p_int.len() - 1).step_by(2) {
+        let (x1, x2) = if p_int[i].x > p_int[i + 1].x {
+            (p_int[i + 1].x, p_int[i].x)
+        } else {
+            (p_int[i].x, p_int[i + 1].x)
+        };
+
+        for x in x1..=x2 {
+            let color = if let Some(intensity) = intensity {
+                intensity
+            } else if let Some(mut texture) = texture.as_mut() {
+                let t = (x - x1) as f32 / (x2 - x1) as f32;
+                let tex_x = p_int[i].x as f32 + t * (p_int[i + 1].x as f32 - p_int[i].x as f32);
+                let tex_y = p_int[i].y as f32 + t * (p_int[i + 1].y as f32 - p_int[i].y as f32);
+                get_texel(&mut texture, tex_x, tex_y)
+            } else {
+                Color::BLACK
+            };
+
+            palette.paint_point(Point::new(x, p_int[i].y), color);
+        }
+    }
 } 
+*/
 
-//scanline com textura 
-pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Option<Color>, texture: Option<&Texture>) {
+//scanline com textura
+/*pub fn scanline(
+    palette: &mut Palette,
+    polygon: &Polygon,
+    intensity: Option<Color>,
+    texture: Option<&mut Texture>,
+) {
     let mut yi = i32::MAX;
     let mut yf = i32::MIN;
     //1
@@ -251,6 +297,7 @@ pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Option<Colo
         //
         intersections.sort_by(|a, b| a.x.cmp(&b.x));
 
-        print_scan(palette, &intersections, intensity);
+        print_scan(palette, &intersections, intensity, texture);
     }
 }
+*/
