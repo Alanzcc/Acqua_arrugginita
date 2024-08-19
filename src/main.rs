@@ -1,6 +1,7 @@
 pub mod math;
 pub mod painting;
 //use painting::canvas::dda;
+pub mod texture_manager;
 //use painting::canvas::bresenham;
 //use crate::painting::canvas::draw_polygon;
 use crate::painting::shapes::Polygon;
@@ -13,6 +14,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
+use sdl2::rect::Rect;
 use std::time::Duration;
 
 pub fn main() -> Result<()> {
@@ -50,7 +52,12 @@ pub fn main() -> Result<()> {
                  Point::from((200, 400)),
             ]);
     */
+    
+    let texture_creator = canvas.texture_creator();
+    let mut texture_manager = texture_manager::TextureManager::new(&texture_creator);
+    let texture = texture_manager.load("img/kirby_open_mouth.png");
 
+    //draw_polygon(&mut ex, &pol, Color::RGB(40, 30, 180))
     let pol = Polygon::new(vec![
         Point::from((200, 200)),
         Point::from((300, 100)),
@@ -58,9 +65,10 @@ pub fn main() -> Result<()> {
         Point::from((400, 400)),
         Point::from((200, 400)),
     ]);
+
+    
     //draw_circle(&mut ex, Color { r: 255, g: 100, b: 0, a: 255 }, Point::new(400, 400), 200.0);
     scanline(&mut ex, &pol, Color::RGB(40, 30, 180));
-    
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -83,6 +91,7 @@ pub fn main() -> Result<()> {
                 canvas.draw_point(*p).expect("Expected to draw pixel");
             }
         }
+
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
