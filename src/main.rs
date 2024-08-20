@@ -1,4 +1,15 @@
 use std::time::Duration;
+pub mod math;
+pub mod painting;
+//use painting::canvas::dda;
+//use painting::canvas::bresenham;
+//use crate::painting::canvas::draw_polygon;
+use crate::painting::shapes::Polygon;
+use crate::painting::shapes::Polygon;
+use painting::palette::Palette;
+use crate::painting::canvas::{draw_polygon, set_pixel};
+
+//use painting::canvas::draw_circle;
 use anyhow::Result;
 use sdl2::event::Event;
 use sdl2::image::LoadTexture;
@@ -19,6 +30,11 @@ pub fn main() -> Result<()> {
     let height = 768;
     let o_w: u32 = 100;
     let o_h: u32 = 100;
+
+
+pub fn main() -> Result<()> {
+    let width = 800;
+    let height = 800;
 
     let sdl_context = sdl2::init().expect("Expected to initialize sdl2");
 
@@ -99,7 +115,20 @@ pub fn main() -> Result<()> {
     //draw_circle(&mut ex, Color { r: 255, g: 100, b: 0, a: 255 }, Point::new(400, 400), 200.0);
     scanline(&mut ex, &pol, Color::RGB(40, 30, 180));
 
+    let mut palette = Palette::init();
+
+
     'running: loop {
+        canvas.set_draw_color(prim_color);
+        canvas.clear();
+        let exs = palette.check_points();
+        for (k, v) in exs.iter() {
+            canvas.set_draw_color(*k);
+            for p in v {
+                set_pixel(&mut canvas, width, height, *p);
+            }
+        }
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
@@ -110,8 +139,6 @@ pub fn main() -> Result<()> {
                 _ => {}
             }
         }
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
 
         //let exs = ex.check_points();
         // for (k, v) in exs.iter() {
@@ -121,6 +148,7 @@ pub fn main() -> Result<()> {
         //    }
         // }
         canvas.copy_ex(&tex, src, dest, 0.0, center, false, false).expect("TODO: panic message");
+
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
