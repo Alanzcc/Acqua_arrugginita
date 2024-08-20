@@ -1,15 +1,22 @@
 pub mod math;
 pub mod painting;
+//use painting::canvas::dda;
+//use painting::canvas::bresenham;
+//use crate::painting::canvas::draw_polygon;
+use crate::painting::shapes::Polygon;
 use crate::painting::shapes::Polygon;
 use painting::palette::Palette;
 use crate::painting::canvas::{draw_polygon, set_pixel};
 
+//use painting::canvas::draw_circle;
 use anyhow::Result;
+use painting::canvas::scanline;
+use painting::palette::Palette;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use std::time::Duration;
 use sdl2::rect::Point;
+use std::time::Duration;
 
 
 pub fn main() -> Result<()> {
@@ -37,27 +44,6 @@ pub fn main() -> Result<()> {
 
     let mut palette = Palette::init();
 
-    let mut polygon = Polygon::new(
-        vec![
-            Point::from((300, 300)),
-            Point::from((500, 300)),
-            Point::from((500, 500)),
-            Point::from((300, 500)),
-        ]);
-    polygon.scale(1.9);
-    //pol.translate(Point::new(100, 100));
-    pol.rotate(40.0);
-    //pol.stretch_x(1.5);
-    //pol.stretch_y(1.5);
-    //pol.squeeze_x(1.5);
-    //pol.squeeze_y(1.5);
-    //pol.shear_x(1.5);
-    //pol.shear_y(1.5);
-    pol.reflection();
-
-
-    draw_polygon(&mut palette, polygon, Color { r: 212, g: 192, b: 100, a: 0 });
-    let prim_color = Color { r: 255, g: 0, b: 0, a: 255 };
     'running: loop {
         canvas.set_draw_color(prim_color);
         canvas.clear();
