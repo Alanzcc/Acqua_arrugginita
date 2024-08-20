@@ -1,19 +1,15 @@
-//use sdl2::rect::Rect;
 use std::time::Duration;
-
-//use painting::canvas::draw_circle;
 use anyhow::Result;
 use sdl2::event::Event;
+use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use sdl2::rect::{Point, Rect};
-use sdl2::render::Canvas;
+use sdl2::render::TextureAccess;
+use sdl2::Sdl;
 use sdl2::surface::Surface;
 use painting::canvas::scanline;
 use painting::palette::Palette;
-//use painting::canvas::dda;
-//use painting::canvas::bresenham;
-//use crate::painting::canvas::draw_polygon;
 use crate::painting::shapes::Polygon;
 
 pub mod math;
@@ -59,11 +55,26 @@ pub fn main() -> Result<()> {
             ]);
     */
 
+    canvas.render_target_supported();
 
     let texture_creator = canvas.texture_creator();
-    let surface = Surface::new(512, 512, PixelFormatEnum::RGB24).unwrap();
-    let loaded = surface.save_bmp("src/img/kirby_open_mouth.png");
-    let texture = surface.as_texture(&texture_creator).unwrap();
+    //let surface = Surface::new(512, 512, PixelFormatEnum::RGB24).unwrap();
+    //let mut texture_fs = surface.as_texture(&texture_creator)?;
+    let mut tex = texture_creator.load_texture("src/img/images.jpg").unwrap();
+
+    //let mut texture = texture_creator
+    //.create_texture_target(texture_creator.default_pixel_format(), 150, 150)
+   // .unwrap();
+    let _result = canvas.with_texture_canvas(&mut tex, |texture_canvas| {
+        //texture_canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
+        texture_canvas.clear();
+        //texture_canvas.set_draw_color(Color::RGBA(255, 0, 0, 255));
+        texture_canvas.fill_rect(Rect::new(50, 50, 50, 50)).unwrap();
+    });
+
+
+    //let tex = canvas.with_texture_canvas(&mut texel, PixelFormatEnum::RGB24)?;
+
 
     let x: i32 = (o_w / 2) as i32;
     let y: i32 = (o_h / 2) as i32;
@@ -71,6 +82,7 @@ pub fn main() -> Result<()> {
     let dest = Rect::new((x - ((o_w / 2) as i32)) as i32, y - ((o_h / 2) as i32), o_w, o_h);
     let center = Point::new((o_w / 2) as i32, (o_h / 2) as i32);
 
+    
 
     //draw_polygon(&mut ex, &pol, Color::RGB(40, 30, 180))
     let pol = Polygon::new(vec![
@@ -106,7 +118,7 @@ pub fn main() -> Result<()> {
         //        canvas.draw_point(*p).expect("Expected to draw pixel");
         //    }
         // }
-        canvas.copy_ex(&texture, src, dest, 0.0, center, false, false).expect("TODO: panic message");
+        canvas.copy_ex(&tex, src, dest, 0.0, center, false, false).expect("TODO: panic message");
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
