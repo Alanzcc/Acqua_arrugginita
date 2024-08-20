@@ -39,20 +39,21 @@ pub fn main() -> Result<()> {
 
     let mut polygon = Polygon::new(
         vec![
-            Point::from((100, 100)),
-            Point::from((200, 100)),
-            Point::from((200, 200)),
-            Point::from((100, 200)),
+            Point::from((300, 300)),
+            Point::from((500, 300)),
+            Point::from((500, 500)),
+            Point::from((300, 500)),
         ]);
     polygon.scale(1.9);
     //pol.translate(Point::new(100, 100));
-    //pol.rotate(30.0);
+    pol.rotate(40.0);
     //pol.stretch_x(1.5);
     //pol.stretch_y(1.5);
     //pol.squeeze_x(1.5);
     //pol.squeeze_y(1.5);
     //pol.shear_x(1.5);
     //pol.shear_y(1.5);
+    pol.reflection();
 
 
     draw_polygon(&mut palette, polygon, Color { r: 212, g: 192, b: 100, a: 0 });
