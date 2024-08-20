@@ -216,3 +216,7 @@ pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
         print_scan(palette, &intersections, intensity);
     }
 }
+
+pub fn window_to_viewport(x_w: i32, y_w: i32, x_wmax: i32, y_wmax: i32,  ) {
+    
+}
