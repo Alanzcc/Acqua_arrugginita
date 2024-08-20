@@ -27,4 +27,5 @@ impl Palette {
     pub fn paint_point(&mut self, point: Point, color: Color) {
         self.color_map.entry(color).or_default().push(point);
     }
+
 }

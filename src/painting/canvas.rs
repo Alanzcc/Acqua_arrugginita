@@ -1,9 +1,10 @@
 use crate::math::Matrix;
 use crate::painting::shapes::Polygon;
 use crate::Palette;
-use core::f32::consts::PI;
+//use core::f32::consts::PI;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
+//use sdl2::render::Texture;
 //use crate::painting::shapes::Polygon;
 //use core::f32::consts::PI;
 use crate::painting::shapes::Polygon;
@@ -140,10 +141,11 @@ fn find_intersection(y: i32, pi: &Point, pf: &Point) -> Option<Point> {
 
     let x = p_i.x as f32 + t * (p_f.x - p_i.x) as f32;
 
-   Some(Point::new(x.round() as i32, y))
+    Some(Point::new(x.round() as i32, y))
 }
 
 //5
+
 fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
     if p_int.len() < 2 {
         //menos de dois pontos de interseção (não desenha nada)
@@ -162,6 +164,7 @@ fn print_scan(palette: &mut Palette, p_int: &[Point], intensity: Color) {
         }
     }
 }
+
 
 pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
     let mut yi = i32::MAX;
@@ -196,15 +199,108 @@ pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
         //
         intersections.sort_by(|a, b| a.x.cmp(&b.x));
 
-        /*if intersections.len() % 2 != 0 {
-            if let Some(last_point) = intersections.last() {
-                intersections.push(Point::new(last_point.x, y));
-            }
-        } */
-       
         print_scan(palette, &intersections, intensity);
     }
 }
+
+
+//Textura
+/*pub fn get_texel(texture: &mut Texture, tx: f32, ty: f32) -> Color {
+    let query = texture.query();
+    let width = query.width;
+    let height = query.height;
+    let t_x = tx.abs() % 1.0;
+    let t_y = ty.abs() % 1.0;
+
+    let x = ((width - 1) as f32 * t_x).round() as u32;
+    let y = ((height - 1) as f32 * t_y).round() as u32;
+
+
+}
+    */
+
+//print_scan com textura
+
+/*
+fn print_scan(
+    palette: &mut Palette,
+    p_int: &[Point],
+    intensity: Option<Color>,
+    mut texture: Option<&mut Texture>,
+) {
+    if p_int.len() < 2 {
+        //menos de dois pontos de interseção (não desenha nada)
+        return;
+    }
+    //esquerda p/ direita
+    for i in (0..p_int.len() - 1).step_by(2) {
+        let (x1, x2) = if p_int[i].x > p_int[i + 1].x {
+            (p_int[i + 1].x, p_int[i].x)
+        } else {
+            (p_int[i].x, p_int[i + 1].x)
+        };
+
+        for x in x1..=x2 {
+            let color = if let Some(intensity) = intensity {
+                intensity
+            } else if let Some(mut texture) = texture.as_mut() {
+                let t = (x - x1) as f32 / (x2 - x1) as f32;
+                let tex_x = p_int[i].x as f32 + t * (p_int[i + 1].x as f32 - p_int[i].x as f32);
+                let tex_y = p_int[i].y as f32 + t * (p_int[i + 1].y as f32 - p_int[i].y as f32);
+                get_texel(&mut texture, tex_x, tex_y)
+            } else {
+                Color::BLACK
+            };
+
+            palette.paint_point(Point::new(x, p_int[i].y), color);
+        }
+    }
+} 
+*/
+
+//scanline com textura
+/*pub fn scanline(
+    palette: &mut Palette,
+    polygon: &Polygon,
+    intensity: Option<Color>,
+    texture: Option<&mut Texture>,
+) {
+    let mut yi = i32::MAX;
+    let mut yf = i32::MIN;
+    //1
+    //encontrar o y minimo e maximo do poligono
+    for i in 0..polygon.len() {
+        let vertex = polygon.read_vertex(i);
+        if vertex.y < yi {
+            yi = vertex.y;
+        }
+        if vertex.y > yf {
+            yf = vertex.y
+        }
+    }
+
+    //
+    for y in yi..=yf {
+        let mut intersections: Vec<Point> = Vec::new();
+
+        let mut previous_vertex = polygon.read_vertex(polygon.len() - 1);
+        // D->A, A->B, B->C, C->D //4
+
+        for i in 0..polygon.len() {
+            let current_vertex = polygon.read_vertex(i);
+            if let Some(intersection) = find_intersection(y, &previous_vertex, &current_vertex) {
+                intersections.push(intersection);
+            }
+            previous_vertex = current_vertex;
+        }
+
+        //
+        intersections.sort_by(|a, b| a.x.cmp(&b.x));
+
+        print_scan(palette, &intersections, intensity, texture);
+    }
+}
+*/
 
 // Circle polygon should be empty
 pub fn calc_circle(center: Point, r: f32) -> Polygon {
