@@ -15,8 +15,8 @@ use crate::painting::shapes::Polygon;
 pub mod math;
 pub mod painting;
 pub fn main() -> Result<()> {
-    let width = 800;
-    let height = 800;
+    let width = 1366;
+    let height = 768;
     let o_w: u32 = 100;
     let o_h: u32 = 100;
 
@@ -59,8 +59,9 @@ pub fn main() -> Result<()> {
 
     let texture_creator = canvas.texture_creator();
     //let surface = Surface::new(512, 512, PixelFormatEnum::RGB24).unwrap();
+    //surface.
     //let mut texture_fs = surface.as_texture(&texture_creator)?;
-    let mut tex = texture_creator.load_texture("src/img/images.jpg").unwrap();
+    let mut tex = texture_creator.load_texture("src/img/kirby_dormindo.jpg").unwrap();
 
     //let mut texture = texture_creator
     //.create_texture_target(texture_creator.default_pixel_format(), 150, 150)
@@ -69,7 +70,7 @@ pub fn main() -> Result<()> {
         //texture_canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
         texture_canvas.clear();
         //texture_canvas.set_draw_color(Color::RGBA(255, 0, 0, 255));
-        texture_canvas.fill_rect(Rect::new(50, 50, 50, 50)).unwrap();
+        texture_canvas.fill_rect(Rect::new(o_w as i32, o_h as i32, 100, 100)).unwrap();
     });
 
 
@@ -79,7 +80,8 @@ pub fn main() -> Result<()> {
     let x: i32 = (o_w / 2) as i32;
     let y: i32 = (o_h / 2) as i32;
     let src = Rect::new(0, 0, width, height);
-    let dest = Rect::new((x - ((o_w / 2) as i32)) as i32, y - ((o_h / 2) as i32), o_w, o_h);
+    let dest = Rect::new(683 as i32 / 2, 384 as i32 / 2, o_w, o_h);
+    //let dest = Rect::new((x - ((o_w / 2) as i32)) as i32, y - ((o_h / 2) as i32), o_w, o_h);
     let center = Point::new((o_w / 2) as i32, (o_h / 2) as i32);
 
     
