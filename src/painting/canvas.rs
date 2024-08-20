@@ -6,29 +6,18 @@ use sdl2::pixels::Color;
 use sdl2::rect::Point;
 //use crate::painting::shapes::Polygon;
 //use core::f32::consts::PI;
+use crate::painting::shapes::Polygon;
+use core::f32::consts::PI;
+use sdl2::render::WindowCanvas;
 
-pub fn set_pixel(screen: &mut Matrix, mut x: usize, mut y: usize, intensity: Color) {
-    let c = screen.get_n_cols();
-    let r = screen.get_n_rows();
-    if x >= c {
-        x = c - 1;
+
+pub fn set_pixel(canvas: &mut WindowCanvas, width: u32, height: u32, p: Point) {
+    if p.x >= 0 && p.x < width as i32 {
+        if p.y >= 0 && p.x < height as i32 {
+            canvas.draw_point(*p).expect("Expected to draw pixel");
+        }
     }
-    if y >= r {
-        y = r - 1;
-    }
-    screen.set_data(x, y, intensity);
 }
-
-//Textura
-/*pub fn get_texel(palette: &mut Palette, tx: f32, ty: f32) {
-    let mut t_x = tx.abs();
-    let mut t_y = ty.abs();
-
-    t_x = t_x - tx.floor();
-    t_y = t_y - ty.floor();
-
-    x = ()
-} */
 
 // Bresenham
 pub fn bresenham(palette: &mut Palette, xi: i32, yi: i32, xf: i32, yf: i32, intensity: Color) {
@@ -216,3 +205,18 @@ pub fn scanline(palette: &mut Palette, polygon: &Polygon, intensity: Color) {
         print_scan(palette, &intersections, intensity);
     }
 }
+
+// Circle polygon should be empty
+pub fn calc_circle(center: Point, r: f32) -> Polygon {
+    let mut circle = Polygon::new(vec![]);
+    let mut angle: f32 = 0.0;
+    while angle < 2.0 * PI {
+        circle.add_vertex(
+            Point::new((center.x as f32 + (r * angle.cos())).floor() as i32,
+                       (center.y as f32 + (r * angle.sin())).floor() as i32));
+        angle += 0.05;
+    }
+    circle
+}
+
+
